@@ -1,0 +1,6 @@
+#!/bin/sh
+
+pacstrap /mnt base base-devel
+pacstrap /mnt syslinux
+genfstab -p -L /mnt >>/mnt/etc/fstab
+arch-chroot /mnt

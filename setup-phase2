@@ -1,0 +1,44 @@
+#!/bin/sh
+
+set -e
+
+hostname=$1
+if [ -z "$hostname" ]; then
+    echo >&2 "Usage: $0 HOSTNAME"
+    exit 2
+fi
+
+pacman -Sy
+
+# Hostname
+echo $hostname >/etc/hostname
+sed -i -e "s,localhost$,localhost $hostname," /etc/hosts
+
+# Timezone
+timezone=America/Phoenix
+ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
+echo $timezone >/etc/timezone
+
+# Locales
+sed -i -e '/^#en_US.UTF-8 /s/^#//' /etc/locale.gen
+locale-gen
+echo 'LANG=en_US.UTF-8' >/etc/locale.conf
+
+
+# Initramfs
+pacman -S btrfs-progs
+sed -i -e's,^MODULES="",MODULES="crc32c",' /etc/mkinitcpio.conf
+sed -i -e's,^HOOKS="\(.*\)",HOOKS="\1 btrfs timestamp",' /etc/mkinitcpio.conf
+mkinitcpio -p linux
+
+# Systemd
+pacman -R initscripts sysvinit
+pacman -S systemd systemd-sysvcompat
+
+# Console font
+pacman -S terminus-font
+echo 'FONT=ter-220n' >/etc/vconsole.conf
+
+# Install bootloader and set root password
+syslinux-install_update -i -a -m
+passwd root
