@@ -1,0 +1,82 @@
+#!/bin/sh
+
+set -e
+
+if [ "$(id -u)" -eq 0 ]; then
+    echo >&2 "Error: $0 is intended to be run as a user with sudo access"
+    exit 1
+fi
+
+alias pacman="sudo pacman --noconfirm"
+
+sed -i -e '/^OPTIONS=/s/libtool/!libtool/' /etc/makepkg.conf
+CPUS=$(grep -c processor /proc/cpuinfo)
+JOBS=$(expr $CPUS * 3 / 2)
+sed -i -e "s,#*MAKEFLAGS=.*,MAKEFLAGS=\"-j$JOBS\"," /etc/makepkg.conf
+
+curl https://github.com/kergoth/aur-dropbear/tarball/master | tar -zxvf -
+cd dropbear
+makepkg
+pacman -U dropbear*xz
+cd - >/dev/null
+sudo systemctl enable dropbear.socket
+
+# Install yaourt for builds from the AUR
+pacman -S yajl
+curl https://aur.archlinux.org/packages/pa/package-query/package-query.tar.gz | tar -zxvf -
+cd package-query                   
+makepkg
+pacman -U package-query-*.tar.xz
+cd ..
+
+curl https://aur.archlinux.org/packages/ya/yaourt/yaourt.tar.gz | tar -zxvf -
+cd yaourt
+makepkg
+pacman -U yaourt-*.tar.xz
+
+# Ensure we can build 32 bit binaries
+pacman -R binutils gcc-libs gcc
+pacman -S binutils-multlib gcc-libs-multilib gcc-multilib
+
+pacman -S openssh sudo nss-mdns avahi pkgfile git mercurial
+
+sudo pkgfile -u
+
+sudo sed -i -e 's/# \(%wheel ALL=(ALL) ALL\)/\1/' /etc/sudoers
+
+sudo sed -i -e '/hosts:/s/dns/mdns_minimal dns/' /etc/nsswitch.conf
+sudo systemctl enable avahi-daemon.service
+
+pacman -S zsh
+
+sudo groupadd -r -g 51 staff
+sudo chgrp -R staff /usr/local
+sudo chmod -R g+rwX /usr/local
+sudo find /usr/local -type d -exec chmod g+s "{}" \;
+sudo useradd -m -g users -G staff,wheel,uucp,storage -s /bin/zsh kergoth
+
+pacman -S vim tmux subversion python2 python2-pip
+
+# Clean up
+pacman -R ppp nano
+
+# As appropriate given the hardware configuration
+#pacman -R pcmciautils wpa_supplicant
+
+
+# GUI bits
+sudo ln -sf . /usr/bin/X11
+
+pacman -S xorg-xrdb xorg-xauth xorg-server xorg-xinit slim
+
+cat >X20-local-fonts.conf <<END
+Section "Files"
+    FontPath     "/usr/share/fonts/local/"
+EndSection
+END
+sudo mv X20-local-fonts.conf /etc/X11/xorg.conf.d/
+
+# If vmware
+pacman -S xf86-input-vmmouse xf86-video-vmware
+
+sudo systemctl enable slim.service

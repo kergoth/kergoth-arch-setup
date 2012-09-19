@@ -19,7 +19,7 @@ pacman -Sy
 
 # Hostname
 echo $hostname >/etc/hostname
-sed -i -e "s,localhost$,localhost $hostname," /etc/hosts
+sed -i -e "s,\tlocalhost,\t$hostname localhost," /etc/hosts
 
 # Timezone
 ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
@@ -38,6 +38,7 @@ mkinitcpio -p linux
 
 # Systemd
 pacman -R initscripts sysvinit
+pacman -R syslog-ng
 pacman -S systemd systemd-sysvcompat
 
 # Console font
