@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -e
+set -ex
 
 hostname=$1
 if [ -z "$hostname" ]; then
@@ -48,6 +48,19 @@ if [ -n "$font" ]; then
     pacman -S $package
     echo "FONT=$fontname" >/etc/vconsole.conf
 fi
+
+# User setup
+groupadd -r -g 51 staff
+chgrp -R staff /usr/local
+chmod -R g+rwX /usr/local
+find /usr/local -type d -exec chmod g+s "{}" \;
+
+pacman -S sudo
+sudo sed -i -e 's/# \(%wheel ALL=(ALL) ALL\)/\1/' /etc/sudoers
+
+pacman -S zsh
+useradd -m -g users -G staff,wheel,uucp,storage -s /bin/zsh kergoth
+passwd kergoth
 
 # Install bootloader and set root password
 syslinux-install_update -i -a -m
