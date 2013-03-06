@@ -1,7 +1,5 @@
 #!/bin/sh
 
-set -e
-
 if [ "$(id -u)" -eq 0 ]; then
     echo >&2 "Error: $0 is intended to be run as a user with sudo access"
     exit 1
@@ -14,8 +12,8 @@ CPUS=$(grep -c processor /proc/cpuinfo)
 JOBS=$(expr $CPUS \* 3 / 2)
 sudo sed -i -e "s,#*MAKEFLAGS=.*,MAKEFLAGS=\"-j$JOBS\"," /etc/makepkg.conf
 
-curl https://github.com/kergoth/aur-dropbear/tarball/master | tar -zxvf -
-cd kergoth-aur-dropbear-*
+curl -L http://github.com/kergoth/aur-dropbear/archive/master.tar.gz | tar -zxvf -
+cd aur-dropbear-master
 makepkg
 pacman -U dropbear*xz
 cd ..
