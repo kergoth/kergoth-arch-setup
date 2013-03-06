@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -ex
+set -x
 
 hostname=$1
 if [ -z "$hostname" ]; then
