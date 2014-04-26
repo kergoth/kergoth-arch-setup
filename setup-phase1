@@ -3,5 +3,5 @@
 pacstrap /mnt base base-devel
 pacstrap /mnt syslinux
 genfstab -p -L /mnt >>/mnt/etc/fstab
-cp ~/* /mnt/root/
+cp -a ~/* /mnt/root/
 arch-chroot /mnt
