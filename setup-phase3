@@ -7,7 +7,7 @@ fi
 
 alias pacman="sudo pacman --noconfirm"
 
-sudo sed -i -e '/^OPTIONS=/s/libtool/!libtool/' /etc/makepkg.conf
+sudo sed -i -e '/^OPTIONS=/{ s/!*libtool/libtool/; s/libtool/!libtool/; }' /etc/makepkg.conf
 CPUS=$(grep -c processor /proc/cpuinfo)
 JOBS=$(expr $CPUS \* 3 / 2)
 sudo sed -i -e "s,#*MAKEFLAGS=.*,MAKEFLAGS=\"-j$JOBS\"," /etc/makepkg.conf
@@ -27,7 +27,7 @@ pacman -S nss-mdns avahi pkgfile git mercurial
 sudo pkgfile -u
 
 
-sudo sed -i -e '/hosts:/s/dns/mdns_minimal dns/' /etc/nsswitch.conf
+sudo sed -i -e '/hosts:/{ s/mdns_minimal //g; s/dns/mdns_minimal dns/; }' /etc/nsswitch.conf
 sudo systemctl enable avahi-daemon.service
 sudo systemctl start avahi-daemon.service || true
 
