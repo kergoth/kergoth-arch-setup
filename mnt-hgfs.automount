@@ -1,0 +1,10 @@
+[Unit]
+Description=Load VMware shared folders
+ConditionPathExists=.host:/
+ConditionVirtualization=vmware
+
+[Automount]
+Where=/mnt/hgfs
+
+[Install]
+WantedBy=multi-user.target

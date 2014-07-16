@@ -36,16 +36,6 @@ pacman -S vim tmux subversion python2 python2-pip
 # Clean up
 pacman -R ppp nano pcmciautils
 
-# If vmware
-if grep -q vmci /proc/misc; then
-    pacman -S xf86-input-vmmouse xf86-video-vmware
-    pacman -S open-vm-tools open-vm-tools-modules
-    sudo systemctl enable vmtoolsd.service
-    sudo systemctl start vmtoolsd.service || true
-    sudo sed -i -e '/hgfs/d' /etc/fstab
-    sudo sh -c "echo '.host:/   /mnt/hgfs   vmhgfs  defaults  0 0' >>/etc/fstab"
-fi
-
 # GUI bits
 sudo ln -sf . /usr/bin/X11
 
@@ -74,3 +64,15 @@ makepkg -f
 pacman -U yaourt-*.tar.xz
 
 yaourt -S urxvtcd
+
+# If vmware
+if grep -q vmci /proc/misc; then
+    pacman -S xf86-input-vmmouse xf86-video-vmware
+    pacman -S open-vm-tools
+    yaourt -S open-vm-tools-dkms
+    sudo systemctl enable vmtoolsd.service
+    sudo systemctl start vmtoolsd.service || true
+    sudo sh -c "echo vmhgfs >/etc/modules-load.d/vmware.conf"
+    sudo cp mnt-hgfs.mount mnt-hgfs.automount /etc/systemd/system/
+    sudo systemctl enable mnt-hgfs.automount
+fi
