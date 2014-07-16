@@ -17,7 +17,7 @@ cd aur-dropbear-master
 makepkg
 pacman -U dropbear*xz
 cd ..
-sudo systemctl enable dropbear.socket
+sudo systemctl enable dropbear.service
 
 # Ensure we can build 32 bit binaries
 yes | pacman -S binutils-multilib gcc-libs-multilib gcc-multilib
