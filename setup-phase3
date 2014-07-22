@@ -88,6 +88,6 @@ if grep -q vmci /proc/misc; then
     sudo systemctl enable vmtoolsd.service
     sudo systemctl start vmtoolsd.service || true
     sudo sh -c "echo vmhgfs >/etc/modules-load.d/vmware.conf"
-    sudo cp mnt-hgfs.mount mnt-hgfs.automount /etc/systemd/system/
+    sudo cp $(dirname "$0")/mnt-hgfs.mount $(dirname "$0")/mnt-hgfs.automount /etc/systemd/system/
     sudo systemctl enable mnt-hgfs.automount
 fi
