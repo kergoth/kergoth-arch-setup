@@ -4,6 +4,7 @@ if [ "$(id -u)" -eq 0 ]; then
     echo >&2 "Error: $0 is intended to be run as a user with sudo access"
     exit 1
 fi
+scriptdir="$(cd "$(dirname "$0")" && pwd)"
 
 makepkg () {
     command makepkg --noconfirm --needed "$@"
@@ -88,6 +89,6 @@ if grep -q vmci /proc/misc; then
     sudo systemctl enable vmtoolsd.service
     sudo systemctl start vmtoolsd.service || true
     sudo sh -c "echo vmhgfs >/etc/modules-load.d/vmware.conf"
-    sudo cp $(dirname "$0")/mnt-hgfs.mount $(dirname "$0")/mnt-hgfs.automount /etc/systemd/system/
+    sudo cp $scriptdir/mnt-hgfs.mount $scriptdir/mnt-hgfs.automount /etc/systemd/system/
     sudo systemctl enable mnt-hgfs.automount
 fi
