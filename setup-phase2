@@ -10,8 +10,9 @@ fi
 locale="en_US.UTF-8"
 timezone="America/Phoenix"
 initcpio_modules="crc32c"
-initcpio_extra_hooks="btrfs"
+initcpio_extra_hooks=
 font="terminus-font ter-220n"
+root_fs="$(grep ' /mnt/ ' /proc/mounts|awk '{print $3}')"
 
 alias pacman="pacman --noconfirm"
 pacman -Sy
@@ -30,9 +31,14 @@ locale-gen
 echo "LANG=$locale" >/etc/locale.conf
 
 # Initramfs
-pacman -S btrfs-progs
+if [ "$root_fs" = "btrfs" ]; then
+    pacman -S btrfs-progs
+    initcpio_extra_hooks="$initcpio_extra_hooks btrfs"
+fi
 sed -i -e"s,^MODULES=\"\",MODULES=\"$initcpio_modules\"," /etc/mkinitcpio.conf
-sed -i -e"s,^HOOKS=\"\(.*\)\",HOOKS=\"\1 $initcpio_extra_hooks\"," /etc/mkinitcpio.conf
+if [ -n "$initcpio_extra_hooks" ]; then
+    sed -i -e"s,^HOOKS=\"\(.*\)\",HOOKS=\"\1 $initcpio_extra_hooks\"," /etc/mkinitcpio.conf
+fi
 mkinitcpio -p linux
 
 # Systemd
