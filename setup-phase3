@@ -5,19 +5,26 @@ if [ "$(id -u)" -eq 0 ]; then
     exit 1
 fi
 
+makepkg () {
+    command makepkg --noconfirm --needed "$@"
+}
+
+pacman () {
+    command pacman --noconfirm --needed "$@"
+}
+
 install_aur () {
     pkg="$1"
     shift
     if [ $# -gt 0 ]; then
         pacman -Sya "$@"
     fi
-    curl https://aur.archlinux.org/packages/pa/$pkg/$pkg.tar.gz | tar -zxvf -
+    prefix="$(echo "$pkg" | sed 's,\(..\).*,\1,')"
+    curl -L https://aur.archlinux.org/packages/$prefix/$pkg/$pkg.tar.gz | tar -zxvf -
     cd "$pkg"
     makepkg -sci
     cd - >/dev/null
 }
-
-alias pacman="sudo pacman --noconfirm"
 
 sudo sed -i -e '/^OPTIONS=/{ s/!*libtool/libtool/; s/libtool/!libtool/; }' /etc/makepkg.conf
 CPUS=$(grep -c processor /proc/cpuinfo)
@@ -55,7 +62,7 @@ END
 sudo mv X20-local-fonts.conf /etc/X11/xorg.conf.d/
 
 
-mkdir ~/Build
+mkdir -p ~/Build
 cd ~/Build
 
 curl -L http://github.com/kergoth/aur-dropbear/archive/master.tar.gz | tar -zxf -
@@ -67,9 +74,9 @@ sudo systemctl enable dropbear.service
 install_aur cower
 install_aur urxvtcd
 
-mkdir meat
+mkdir -p meat
 cd meat
-curl -O https://github.com/e36freak/meat/blob/master/PKGBUILD
+curl -O https://raw.githubusercontent.com/e36freak/meat/master/PKGBUILD
 makepkg -sci
 cd - >/dev/null
 
