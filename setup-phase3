@@ -5,6 +5,18 @@ if [ "$(id -u)" -eq 0 ]; then
     exit 1
 fi
 
+install_aur () {
+    pkg="$1"
+    shift
+    if [ $# -gt 0 ]; then
+        pacman -Sya "$@"
+    fi
+    curl https://aur.archlinux.org/packages/pa/$pkg/$pkg.tar.gz | tar -zxvf -
+    cd "$pkg"
+    makepkg -sci
+    cd - >/dev/null
+}
+
 alias pacman="sudo pacman --noconfirm"
 
 sudo sed -i -e '/^OPTIONS=/{ s/!*libtool/libtool/; s/libtool/!libtool/; }' /etc/makepkg.conf
@@ -12,20 +24,12 @@ CPUS=$(grep -c processor /proc/cpuinfo)
 JOBS=$(expr $CPUS \* 3 / 2)
 sudo sed -i -e "s,#*MAKEFLAGS=.*,MAKEFLAGS=\"-j$JOBS\"," /etc/makepkg.conf
 
-curl -L http://github.com/kergoth/aur-dropbear/archive/master.tar.gz | tar -zxvf -
-cd aur-dropbear-master
-makepkg
-pacman -U dropbear*xz
-cd ..
-sudo systemctl enable dropbear.service
-
 # Ensure we can build 32 bit binaries
 yes | pacman -S binutils-multilib gcc-libs-multilib gcc-multilib
 
 pacman -S nss-mdns avahi pkgfile git mercurial
 
 sudo pkgfile -u
-
 
 sudo sed -i -e '/hosts:/{ s/mdns_minimal //g; s/dns/mdns_minimal dns/; }' /etc/nsswitch.conf
 sudo systemctl enable avahi-daemon.service
@@ -50,26 +54,30 @@ EndSection
 END
 sudo mv X20-local-fonts.conf /etc/X11/xorg.conf.d/
 
-# Install yaourt for builds from the AUR
-pacman -S yajl
-curl https://aur.archlinux.org/packages/pa/package-query/package-query.tar.gz | tar -zxvf -
-cd package-query
-makepkg -f
-pacman -U package-query-*.tar.xz
-cd ..
 
-curl https://aur.archlinux.org/packages/ya/yaourt/yaourt.tar.gz | tar -zxvf -
-cd yaourt
-makepkg -f
-pacman -U yaourt-*.tar.xz
+mkdir ~/Build
+cd ~/Build
 
-yaourt -S urxvtcd
+curl -L http://github.com/kergoth/aur-dropbear/archive/master.tar.gz | tar -zxf -
+cd aur-dropbear-master
+makepkg -sci
+cd - >/dev/null
+sudo systemctl enable dropbear.service
+
+install_aur cower
+install_aur urxvtcd
+
+mkdir meat
+cd meat
+curl -O https://github.com/e36freak/meat/blob/master/PKGBUILD
+makepkg -sci
+cd - >/dev/null
 
 # If vmware
 if grep -q vmci /proc/misc; then
     pacman -S xf86-input-vmmouse xf86-video-vmware
     pacman -S open-vm-tools
-    yaourt -S open-vm-tools-dkms
+    install_aur open-vm-tools-dkms
     sudo systemctl enable vmtoolsd.service
     sudo systemctl start vmtoolsd.service || true
     sudo sh -c "echo vmhgfs >/etc/modules-load.d/vmware.conf"
