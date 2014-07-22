@@ -10,7 +10,7 @@ makepkg () {
 }
 
 pacman () {
-    command pacman --noconfirm --needed "$@"
+    command sudo pacman --noconfirm --needed "$@"
 }
 
 install_aur () {
