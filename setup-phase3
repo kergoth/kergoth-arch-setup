@@ -88,6 +88,10 @@ if grep -q vmci /proc/misc; then
     install_aur open-vm-tools-dkms
     sudo systemctl enable vmtoolsd.service
     sudo systemctl start vmtoolsd.service || true
+    sudo sh -c "sed -i -e '/^MODULES/s/\"$/vmwgfx \"/' /etc/mkinitcpio.conf"
+    if grep vmwgfx /etc/mkinitcpio.conf; then
+        sudo mkinitcpio -p linux
+    fi
     sudo sh -c "echo vmhgfs >/etc/modules-load.d/vmware.conf"
     sudo cp $scriptdir/mnt-hgfs.mount $scriptdir/mnt-hgfs.automount /etc/systemd/system/
     sudo systemctl enable mnt-hgfs.automount
