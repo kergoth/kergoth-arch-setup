@@ -54,6 +54,9 @@ if [ -n "$font" ]; then
     echo "FONT=$fontname" >/etc/vconsole.conf
 fi
 
+# SCM
+pacman -S git mercurial
+
 # User setup
 groupadd -r -g 51 staff
 chgrp -R staff /usr/local
@@ -63,8 +66,8 @@ find /usr/local -type d -exec chmod g+s "{}" \;
 pacman -S sudo
 sudo sed -i -e 's/# \(%wheel ALL=(ALL) ALL\)/\1/' /etc/sudoers
 
-pacman -S zsh
-useradd -m -g users -G staff,wheel,uucp,storage -s /bin/zsh kergoth
+pacman -S fish
+useradd -m -g users -G staff,wheel,uucp,storage -s /usr/bin/fish kergoth
 passwd kergoth
 
 # Install bootloader and set root password
