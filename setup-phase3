@@ -90,7 +90,7 @@ if grep -q vmci /proc/misc; then
     sudo systemctl start vmtoolsd.service || true
     
     sudo sh -c "sed -i -e '/^MODULES=/{ s/ vmwgfx//g; s/\"$/ vmwgfx\"/; }' /etc/mkinitcpio.conf"
-    if grep vmwgfx /etc/mkinitcpio.conf; then
+    if grep -q vmwgfx /etc/mkinitcpio.conf; then
         sudo mkinitcpio -p linux
     fi
     
