@@ -35,7 +35,7 @@ sudo sed -i -e "s,#*MAKEFLAGS=.*,MAKEFLAGS=\"-j$JOBS\"," /etc/makepkg.conf
 # Ensure we can build 32 bit binaries
 yes | pacman -S binutils-multilib gcc-libs-multilib gcc-multilib
 
-pacman -S nss-mdns avahi pkgfile git mercurial
+pacman -S nss-mdns avahi pkgfile
 
 sudo pkgfile -u
 
