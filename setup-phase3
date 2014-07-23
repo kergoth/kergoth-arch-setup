@@ -106,5 +106,6 @@ if grep -q vmci /proc/misc; then
     dkms status | cut -d: -f1 | while read name version; do
         name="${name%,}"
         sudo dkms build $name/$version
+        sudo dkms add $name/$version
     done
 fi
