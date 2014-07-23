@@ -103,9 +103,10 @@ if grep -q vmci /proc/misc; then
 
     install_aur open-vm-tools-dkms
     pacman -S linux-headers
-    dkms status | cut -d: -f1 | while read name version; do
-        name="${name%,}"
-        sudo dkms build $name/$version
-        sudo dkms add $name/$version
-    done
+    dkms status | cut -d: -f1 | cut -d, -f1-2 | \
+        while read name version; do
+            name="${name%,}"
+            sudo dkms build $name/$version
+            sudo dkms add $name/$version
+        done
 fi
