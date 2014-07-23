@@ -97,7 +97,8 @@ if grep -q vmci /proc/misc; then
     sudo sh -c "echo vmhgfs >/etc/modules-load.d/vmware.conf"
     sudo cp $scriptdir/mnt-hgfs.mount $scriptdir/mnt-hgfs.automount /etc/systemd/system/
     sudo systemctl enable mnt-hgfs.automount
-    
+    sudo systemctl start mnt-hgfs.automount || true
+
     install_aur open-vm-tools-dkms
     pacman -S linux-headers
     dkms status | cut -d: -f1 | while read name version; do
