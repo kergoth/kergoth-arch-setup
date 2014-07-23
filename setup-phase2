@@ -41,11 +41,6 @@ if [ -n "$initcpio_extra_hooks" ]; then
 fi
 mkinitcpio -p linux
 
-# Systemd
-pacman -R initscripts sysvinit
-pacman -R syslog-ng
-pacman -S systemd systemd-sysvcompat
-
 # Console font
 if [ -n "$font" ]; then
     package=$(echo $font|cut -d" " -f1)
