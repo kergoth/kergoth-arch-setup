@@ -73,6 +73,7 @@ cd aur-dropbear-master
 makepkg -sci
 cd - >/dev/null
 sudo systemctl enable dropbear.service
+sudo systemctl start dropbear.service || true
 
 install_aur cower
 install_aur urxvtcd
