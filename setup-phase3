@@ -31,9 +31,11 @@ sudo sed -i -e '/^OPTIONS=/{ s/!*libtool/libtool/; s/libtool/!libtool/; }' /etc/
 CPUS=$(grep -c processor /proc/cpuinfo)
 JOBS=$(expr $CPUS \* 3 / 2)
 sudo sed -i -e "s,#*MAKEFLAGS=.*,MAKEFLAGS=\"-j$JOBS\"," /etc/makepkg.conf
-
-# Ensure we can build 32 bit binaries
-yes | pacman -S binutils-multilib gcc-libs-multilib gcc-multilib
+if [ "$(uname -m)" = "x86_64" ]; then
+    sudo sed -i -e "/^#\[multilib\]/{ s/^#//; n; s/^#// }" /etc/pacman.conf
+    # Ensure we can build 32 bit binaries
+    yes | pacman -Sy binutils-multilib gcc-libs-multilib gcc-multilib
+fi
 
 pacman -S nss-mdns avahi pkgfile
 
