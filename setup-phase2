@@ -12,7 +12,8 @@ timezone="America/Phoenix"
 initcpio_modules="crc32c"
 initcpio_extra_hooks=
 font="terminus-font ter-220n"
-root_fs="$(grep ' /mnt/ ' /proc/mounts|awk '{print $3}')"
+root_fs="$(sed -n -e '/[         ]\/[    ]/p' /proc/mounts | awk '{print $3}')"
+root_dev="$(sed -n -e '/[         ]\/[    ]/p' /proc/mounts | awk '{print $1}')"
 
 alias pacman="pacman --noconfirm"
 pacman -Sy
@@ -66,5 +67,14 @@ useradd -m -g users -G staff,wheel,uucp,storage -s /bin/zsh kergoth
 passwd kergoth
 
 # Install bootloader and set root password
-syslinux-install_update -i -a -m
+case "${2:-syslinux}" in
+    syslinux)
+        syslinux-install_update -i -a -m
+        ;;
+    grub)
+        grub-mkconfig -o /boot/grub/grub.cfg
+        grub-install "$(echo $root_dev | sed 's,[0-9]*$,,')"
+        ;;
+esac
+
 passwd root
