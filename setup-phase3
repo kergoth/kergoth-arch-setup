@@ -72,14 +72,7 @@ sudo mv X20-local-fonts.conf /etc/X11/xorg.conf.d/
 mkdir -p ~/Build
 cd ~/Build
 
-install_aur cower
 install_aur urxvtcd
-
-mkdir -p meat
-cd meat
-curl -O https://raw.githubusercontent.com/e36freak/meat/master/PKGBUILD
-makepkg -sci
-cd - >/dev/null
 
 # If vmware
 if grep -q vmci /proc/misc; then
