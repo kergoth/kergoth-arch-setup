@@ -54,6 +54,7 @@ pacman -S vim tmux subversion python2 python2-pip
 sudo pacman --noconfirm -R ppp nano pcmciautils
 
 # GUI bits
+sudo rm -f /usr/bin/X11 || :
 sudo ln -sf . /usr/bin/X11
 
 pacman -S xorg-xrdb xorg-xauth xorg-server xorg-xinit slim xorg-xset autocutsel
