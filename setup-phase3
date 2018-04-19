@@ -74,29 +74,15 @@ cd ~/Build
 
 install_aur urxvtcd
 
-# If vmware
 if grep -q vmci /proc/misc; then
+    # vmware
     pacman -S xf86-input-vmmouse xf86-video-vmware
     pacman -S open-vm-tools
-    
+
     sudo systemctl enable vmtoolsd.service
     sudo systemctl start vmtoolsd.service || true
-    
-    sudo sh -c "sed -i -e '/^MODULES=/{ s/ vmwgfx//g; s/\"$/ vmwgfx\"/; }' /etc/mkinitcpio.conf"
-    if grep -q vmwgfx /etc/mkinitcpio.conf; then
-        sudo mkinitcpio -p linux
-    fi
-    
-    sudo sh -c "echo vmhgfs >/etc/modules-load.d/vmware.conf"
+
     sudo cp $scriptdir/mnt-hgfs.mount $scriptdir/mnt-hgfs.automount /etc/systemd/system/
     sudo systemctl enable mnt-hgfs.automount
     sudo systemctl start mnt-hgfs.automount || true
-
-    install_aur open-vm-tools-dkms
-    pacman -S linux-headers
-    dkms status | cut -d: -f1 | cut -d, -f1-2 | \
-        while read name version; do
-            name="${name%,}"
-            sudo dkms install $name/$version
-        done
 fi
