@@ -51,7 +51,7 @@ sudo systemctl start avahi-daemon.service || true
 pacman -S vim tmux subversion python2 python2-pip
 
 # Clean up
-pacman -R ppp nano pcmciautils
+sudo pacman --noconfirm -R ppp nano pcmciautils
 
 # GUI bits
 sudo ln -sf . /usr/bin/X11
