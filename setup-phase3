@@ -26,6 +26,8 @@ install_aur () {
     cd - >/dev/null
 }
 
+pacman -Sy
+
 sudo pacman -S openssh && sudo systemctl enable sshd && sudo systemctl start sshd
 
 sudo sed -i -e '/^OPTIONS=/{ s/!*libtool/libtool/; s/libtool/!libtool/; }' /etc/makepkg.conf
