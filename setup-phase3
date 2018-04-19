@@ -27,6 +27,8 @@ install_aur () {
     cd - >/dev/null
 }
 
+sudo pacman -S openssh && sudo systemctl enable sshd && sudo systemctl start sshd
+
 sudo sed -i -e '/^OPTIONS=/{ s/!*libtool/libtool/; s/libtool/!libtool/; }' /etc/makepkg.conf
 CPUS=$(grep -c processor /proc/cpuinfo)
 JOBS=$(expr $CPUS \* 3 / 2)
@@ -67,13 +69,6 @@ sudo mv X20-local-fonts.conf /etc/X11/xorg.conf.d/
 
 mkdir -p ~/Build
 cd ~/Build
-
-curl -L http://github.com/kergoth/aur-dropbear/archive/master.tar.gz | tar -zxf -
-cd aur-dropbear-master
-makepkg -sci
-cd - >/dev/null
-sudo systemctl enable dropbear.service
-sudo systemctl start dropbear.service || true
 
 install_aur cower
 install_aur urxvtcd
