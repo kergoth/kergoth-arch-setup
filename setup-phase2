@@ -2,10 +2,6 @@
 
 
 hostname=$1
-if [ -z "$hostname" ]; then
-    echo >&2 "Usage: $0 HOSTNAME"
-    exit 2
-fi
 
 locale="en_US.UTF-8"
 timezone="America/Phoenix"
@@ -19,8 +15,10 @@ alias pacman="pacman --noconfirm"
 pacman -Sy
 
 # Hostname
-echo $hostname >/etc/hostname
-sed -i -e "s,\tlocalhost,\t$hostname localhost," /etc/hosts
+if [ -n "$hostname" ]; then
+    echo $hostname >/etc/hostname
+    sed -i -e "s,\tlocalhost,\t$hostname localhost," /etc/hosts
+fi
 
 # Timezone
 ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
