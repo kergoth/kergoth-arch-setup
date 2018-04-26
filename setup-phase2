@@ -69,22 +69,27 @@ chgrp -R staff /usr/local
 chmod -R g+rwX /usr/local
 find /usr/local -type d -exec chmod g+s "{}" \;
 
-pacman -S sudo
-sed -i -e '/# %wheel ALL=(ALL) ALL/s/^# *//' /etc/sudoers
-
 pacman -S zsh
-useradd -m -g users -G staff,wheel,uucp,storage -s /bin/zsh kergoth
-passwd kergoth
+if [ "$OSTYPE" != WSL ]; then
+    pacman -S sudo
+    sed -i -e '/# %wheel ALL=(ALL) ALL/s/^# *//' /etc/sudoers
 
-# Install bootloader and set root password
-case "${2:-syslinux}" in
-    syslinux)
-        syslinux-install_update -i -a -m
-        ;;
-    grub)
-        grub-mkconfig -o /boot/grub/grub.cfg
-        grub-install "$(echo $root_dev | sed 's,[0-9]*$,,')"
-        ;;
-esac
-
-passwd root
+    useradd -m -g users -G staff,wheel,uucp,storage -s /bin/zsh kergoth
+    passwd kergoth
+    
+    # Install bootloader and set root password
+    case "${2:-syslinux}" in
+        syslinux)
+            syslinux-install_update -i -a -m
+            ;;
+        grub)
+            grub-mkconfig -o /boot/grub/grub.cfg
+            grub-install "$(echo $root_dev | sed 's,[0-9]*$,,')"
+            ;;
+    esac
+    
+    passwd root
+else
+    usermod -G power,storage,wheel,staff kergoth
+    chsh -s /bin/zsh kergoth
+fi
