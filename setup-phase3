@@ -55,7 +55,7 @@ if [ "$OSTYPE" != WSL ]; then
     sudo systemctl start avahi-daemon.service || true
 fi
 
-pacman -S vim tmux subversion python2 python2-pip
+pacman -S vim
 
 # Clean up
 sudo pacman --noconfirm -R ppp nano pcmciautils
