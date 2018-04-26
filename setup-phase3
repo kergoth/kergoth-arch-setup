@@ -42,11 +42,6 @@ pacman -S openssh && sudo systemctl enable sshd && sudo systemctl start sshd
 CPUS=$(grep -c processor /proc/cpuinfo)
 JOBS=$(expr $CPUS \* 3 / 2)
 sudo sed -i -e "s,#*MAKEFLAGS=.*,MAKEFLAGS=\"-j$JOBS\"," /etc/makepkg.conf
-if [ "$(uname -m)" = "x86_64" ]; then
-    sudo sed -i -e "/^#\[multilib\]/{ s/^#//; n; s/^#// }" /etc/pacman.conf
-    # Ensure we can build 32 bit binaries
-    pacman -S gcc-libs-multilib gcc-multilib
-fi
 
 pacman -S nss-mdns avahi pkgfile
 
