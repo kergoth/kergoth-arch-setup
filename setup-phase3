@@ -6,6 +6,15 @@ if [ "$(id -u)" -eq 0 ]; then
 fi
 scriptdir="$(cd "$(dirname "$0")" && pwd)"
 
+if [ "$OSTYPE" = "linux-gnu" ]; then
+    case "$(uname -r)" in
+        *Microsoft)
+            # For convenience
+            OSTYPE=WSL
+            ;;
+    esac
+fi
+
 makepkg () {
     command makepkg --noconfirm --needed "$@"
 }
