@@ -1,4 +1,5 @@
 #!/bin/sh
+set -e
 pkg="$1"
 shift
 if [ $# -gt 0 ]; then
@@ -9,4 +10,3 @@ cd ~/Build
 git clone "https://aur.archlinux.org/$pkg.git"
 cd "$pkg"
 makepkg -sci
-cd - >/dev/null
