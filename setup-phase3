@@ -58,7 +58,7 @@ fi
 pacman -S vim
 
 # Clean up
-sudo pacman --noconfirm -R ppp nano pcmciautils
+sudo pacman --noconfirm -R nano
 
 # GUI bits
 sudo rm -f /usr/bin/X11 || :
