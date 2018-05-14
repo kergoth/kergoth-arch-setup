@@ -1,0 +1,1 @@
+- Add and use aur repo for my branch of `st`, if `xst` on AUR ends up non-viable
