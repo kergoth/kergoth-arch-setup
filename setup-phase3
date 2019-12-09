@@ -55,7 +55,7 @@ if [ "$OSTYPE" != WSL ]; then
     sudo systemctl start avahi-daemon.service || true
 fi
 
-pacman -S vim
+pacman -S neovim
 
 # Clean up
 sudo pacman --noconfirm -R nano :: :
