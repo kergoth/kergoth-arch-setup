@@ -1,0 +1,68 @@
+#!/bin/sh
+
+if [ "$(id -u)" -eq 0 ]; then
+    echo >&2 "Error: $0 is intended to be run as a user with sudo access"
+    exit 1
+fi
+scriptdir="$(cd "$(dirname "$0")" && pwd)"
+
+if [ "$OSTYPE" = "linux-gnu" ]; then
+    case "$(uname -r)" in
+        *Microsoft)
+            # For convenience
+            OSTYPE=WSL
+            ;;
+    esac
+fi
+
+makepkg () {
+    command makepkg --noconfirm --needed "$@"
+}
+
+pacman () {
+    command sudo pacman --noconfirm --needed "$@"
+}
+
+install_aur () {
+    pkg="$1"
+    shift
+    if [ $# -gt 0 ]; then
+        pacman -Sya "$@"
+    fi
+    git clone "https://aur.archlinux.org/$pkg.git"
+    cd "$pkg"
+    makepkg -sci
+    cd - >/dev/null
+}
+
+sudo rm -f /usr/bin/X11 || :
+sudo ln -sf . /usr/bin/X11
+
+pacman -S xorg-xrdb xorg-xauth xorg-server xorg-xinit slim xorg-xset autocutsel
+pacman -S rxvt-unicode
+sudo systemctl enable slim.service
+
+cat >X20-local-fonts.conf <<END
+Section "Files"
+    FontPath     "/usr/share/fonts/local/"
+EndSection
+END
+sudo mv X20-local-fonts.conf /etc/X11/xorg.conf.d/
+
+mkdir -p ~/Build
+cd ~/Build
+
+install_aur urxvtcd
+
+if grep -q vmci /proc/misc; then
+    # vmware
+    pacman -S xf86-input-vmmouse xf86-video-vmware
+    pacman -S open-vm-tools
+
+    sudo systemctl enable vmtoolsd.service
+    sudo systemctl start vmtoolsd.service || true
+
+    sudo cp $scriptdir/mnt-hgfs.mount $scriptdir/mnt-hgfs.automount /etc/systemd/system/
+    sudo systemctl enable mnt-hgfs.automount
+    sudo systemctl start mnt-hgfs.automount || true
+fi
