@@ -22,7 +22,7 @@ alias pacman="pacman --noconfirm --needed"
 pacman -Sy
 
 # Hostname
-if [ -n "$hostname" ]; then
+if [ -n "$hostname" ] && [ "$OSTYPE" != WSL ]; then
     echo $hostname >/etc/hostname
     sed -i -e "s,\tlocalhost,\t$hostname localhost," /etc/hosts
 fi
