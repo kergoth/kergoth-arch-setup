@@ -1,7 +1,47 @@
 #!/bin/sh
 
 
+usage() {
+    echo >&2 "${0##*/} [options] HOSTNAME"
+    echo >&2
+    echo >&2 "Options:"
+    echo >&2
+    echo >&2 "  -u USERS    Users to add or configure. Space-separated."
+    echo >&2 "  -b BOOTLOADER    Bootloader to install (grub or syslinux). Default: grub."
+    exit 2
+}
+
+users=
+bootloader=grub
+while getopts u:b:h opt; do
+    case "$opt" in
+        u)
+            users="$users $OPTARG"
+            ;;
+        b)
+            case "$OPTARG" in
+                syslinux|grub)
+                    bootloader="$OPTARG"
+                    ;;
+                *)
+                    echo >&2 "Error: -b $OPTARG is unsupported. Only grub or syslinux are supported by this script."
+                    exit 1
+                    ;;
+            esac
+            ;;
+        \? | h)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+if [ $# -eq 0 ]; then
+    usage
+fi
+
 hostname=$1
+shift
 
 if [ "$OSTYPE" = "linux-gnu" ]; then
     case "$(uname -r)" in
@@ -29,7 +69,7 @@ fi
 
 # Timezone
 ln -sf /usr/share/zoneinfo/$timezone /etc/localtime
-echo $timezone >/etc/timezone
+hwclock --systohc
 
 # Locales
 sed -i -e "/^#$locale /s/^#//" /etc/locale.gen
@@ -60,8 +100,10 @@ if [ "$OSTYPE" != WSL ]; then
     fi
 fi
 
-# SCM
-pacman -S git
+pacman -S vim net-tools dhcpcd openssh
+
+systemctl enable dhcpcd
+systemctl enable sshd
 
 # User setup
 groupadd -r -g 51 staff
@@ -71,14 +113,10 @@ find /usr/local -type d -exec chmod g+s "{}" \;
 
 pacman -S zsh
 if [ "$OSTYPE" != WSL ]; then
-    pacman -S sudo
-    sed -i -e '/# %wheel ALL=(ALL) ALL/s/^# *//' /etc/sudoers
+    echo >&2 "Input password for root"
+    passwd root
 
-    useradd -m -g users -G staff,wheel,uucp,storage -s /bin/zsh kergoth
-    passwd kergoth
-    
-    # Install bootloader and set root password
-    case "${2:-syslinux}" in
+    case "$bootloader" in
         syslinux)
             syslinux-install_update -i -a -m
             ;;
@@ -87,9 +125,18 @@ if [ "$OSTYPE" != WSL ]; then
             grub-install "$(echo $root_dev | sed 's,[0-9]*$,,')"
             ;;
     esac
-    
-    passwd root
+
+    pacman -S sudo
+    sed -i -e '/# %wheel.*) ALL$/s/^# *//' /etc/sudoers
+
+    for user in $users; do
+        useradd -m -g users -G staff,wheel,uucp,storage -s /bin/zsh "$user"
+        echo >&2 "Input password for $user"
+        passwd "$user"
+    done
 else
-    usermod -G power,storage,wheel,staff kergoth
-    chsh -s /bin/zsh kergoth
+    for user in $users; do
+        usermod -G power,storage,wheel,staff "$user"
+        chsh -s /bin/zsh "$user"
+    done
 fi
