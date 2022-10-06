@@ -1,6 +1,6 @@
 #!/bin/sh
 
-pacstrap /mnt base base-devel
+pacstrap /mnt base linux base-devel
 pacstrap /mnt ${1:-syslinux}
 genfstab -p -L /mnt >>/mnt/etc/fstab
 cp -a ~/* /mnt/root/
