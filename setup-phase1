@@ -1,7 +1,7 @@
 #!/bin/sh
 
 pacstrap /mnt base linux base-devel
-pacstrap /mnt ${1:-syslinux}
+pacstrap /mnt ${1:-grub}
 genfstab -p -L /mnt >>/mnt/etc/fstab
 cp -a ~/* /mnt/root/
 arch-chroot /mnt
